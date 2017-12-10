@@ -8,7 +8,9 @@ package com.jlheard.idw.domain
  */
 class Player {
 
-    public static final JOSH = new Player("Josh")
+    public static final JOSH = new Player("Josh (CPU)")
+
+    public static final String HUMAN_JOSH_NAME = "Josh (HUMAN)"
 
     String name
     Hand hand = new Hand()

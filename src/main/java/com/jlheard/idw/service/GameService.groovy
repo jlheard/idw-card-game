@@ -2,6 +2,7 @@ package com.jlheard.idw.service
 
 import com.jlheard.idw.domain.Game
 import com.jlheard.idw.domain.GameStatus
+import com.jlheard.idw.domain.GameWinner
 import com.jlheard.idw.domain.Player
 import org.springframework.stereotype.Service
 
@@ -28,17 +29,16 @@ class GameService {
 
     Game game
 
-    def addPlayerToGame(Player player) {
-        if(isCorrectGameStatus(ADD_PLAYER_TO_GAME_STATUSES)) {
-            game.players << player
-        } else {
-            false
-        }
+    def addPlayerToGame(String name) {
+        addPlayerToGame(new Player(name))
     }
 
-    def addPlayerToGame(String username) {
+    def addPlayerToGame(Player player) {
         if(isCorrectGameStatus(ADD_PLAYER_TO_GAME_STATUSES)) {
-            game.players.add(new Player(username))
+            if(player.name.trim() == Player.JOSH.name) {
+                player.name = Player.HUMAN_JOSH_NAME
+            }
+            game.players << player
         } else {
             false
         }
@@ -50,11 +50,12 @@ class GameService {
     }
 
     def endRound() {
-        return isCorrectGameStatus(END_ROUND_STATUSES)
-    }
+        if(isCorrectGameStatus(END_ROUND_STATUSES)) {
+            game.status = ROUND_FINISHED
+            return true
+        }
 
-    def findPlayerByUsername(String username) {
-        game.players.find{it.name == username}
+        return false
     }
 
     private def isCorrectGameStatus(List<GameStatus> correctStatuses) {
@@ -88,17 +89,34 @@ class GameService {
         }
     }
 
-    def takeTurn(String username) {
-        return isCorrectGameStatus(TAKE_TURN_STATUSES)
-    }
-
-    static determineGameVictor(Player player1, Player player2) {
-        if(player1.hand.size() == 0) {
-            return player2
+    Player takeTurn() {
+        if(isCorrectGameStatus(TAKE_TURN_STATUSES)) {
+            def roundWinner = TurnService.determineBattleVictor(game.players.first(), game.players.last(), [])
+            endRound()
+            return roundWinner
         }
 
-        if(player2.hand.size() == 0) {
-            return player1
+        return null
+    }
+
+    GameWinner endGame() {
+       def gameWinner = determineGameVictor(game.players.first(), game.players.last())
+        if(gameWinner) {
+            game.status = FINISHED
+        }
+
+        return gameWinner
+    }
+
+    static GameWinner determineGameVictor(Player player1, Player player2) {
+        if(player1.hand.size() == 0 && player2.hand.size() == 0) {
+            return GameWinner.TIE
+        } else if(player2.hand.size() == 0) {
+            return GameWinner.PLAYER_1
+        } else if(player1.hand.size() == 0) {
+            return GameWinner.PLAYER_2
+        } else {
+            return null
         }
     }
 

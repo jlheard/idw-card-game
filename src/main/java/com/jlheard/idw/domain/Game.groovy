@@ -23,7 +23,7 @@ class Game {
 
     GameStatus status = GameStatus.INITIATED
 
-    ArrayList<Player> players = [Player.JOSH]
+    ArrayList<Player> players = new ArrayList<>(2)
 
     String getId() {
         return id

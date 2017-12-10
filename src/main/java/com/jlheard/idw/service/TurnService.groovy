@@ -1,12 +1,7 @@
 package com.jlheard.idw.service
 
-import com.jlheard.idw.domain.Card
-import com.jlheard.idw.domain.Game
-import com.jlheard.idw.domain.GameStatus
-import com.jlheard.idw.domain.Hand
-import com.jlheard.idw.domain.Player
+import com.jlheard.idw.domain.*
 import org.springframework.stereotype.Service
-
 
 /**
  * Created with IntelliJ IDEA.
@@ -64,10 +59,6 @@ class TurnService {
         }
 
         return victor
-    }
-
-    static void endTurn(Game game) {
-        game.status = GameStatus.ROUND_FINISHED
     }
 
     protected static getVictor(Map player1Args, Map player2Args, List<Card> spoils, boolean tie = false) {

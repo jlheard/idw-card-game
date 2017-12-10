@@ -1,8 +1,6 @@
 package com.jlheard.idw.service
 
 import com.jlheard.idw.domain.Card
-import com.jlheard.idw.domain.Game
-import com.jlheard.idw.domain.GameStatus
 import com.jlheard.idw.domain.Hand
 import com.jlheard.idw.domain.Player
 
@@ -13,18 +11,6 @@ import com.jlheard.idw.domain.Player
  * Time: 3:47 PM
  */
 class TurnServiceTest extends GroovyTestCase {
-
-    void testStartTurnCorrectGameStatus() {
-        def game = new Game()
-        TurnService.startTurn(game)
-        assert game.status == GameStatus.ROUND_IN_PROGRESS
-    }
-
-    void testEndTurnCorrectGameStatus() {
-        def game = new Game()
-        TurnService.endTurn(game)
-        assert game.status == GameStatus.ROUND_FINISHED
-    }
 
     void testGetVictorPlayer1() {
         def p1 = new Player("p1")
