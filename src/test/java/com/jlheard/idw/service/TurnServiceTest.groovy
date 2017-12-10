@@ -3,6 +3,7 @@ package com.jlheard.idw.service
 import com.jlheard.idw.domain.Card
 import com.jlheard.idw.domain.Game
 import com.jlheard.idw.domain.GameStatus
+import com.jlheard.idw.domain.Hand
 import com.jlheard.idw.domain.Player
 
 /**
@@ -216,5 +217,36 @@ class TurnServiceTest extends GroovyTestCase {
 
     }
 
+    void testDetermineReinforcementSizeWhenMax() {
+        assert TurnService.determineReinforcementSize(initHandWithCards(12), initHandWithCards(24)) == HandService.MAX_CARDS_TO_PLAY_AT_WAR
+    }
+
+    void testDetermineReinforcementSizeWhenP1IsLow() {
+        def p1Hand = initHandWithCards(2)
+        def p2Hand = initHandWithCards(17)
+        assert TurnService.determineReinforcementSize(p1Hand, p2Hand) == p1Hand.size()
+    }
+
+    void testDetermineReinforcementSizeWhenP2IsLow() {
+        def p1Hand = initHandWithCards(34)
+        def p2Hand = initHandWithCards(3)
+        assert TurnService.determineReinforcementSize(p1Hand, p2Hand) == p2Hand.size()
+    }
+
+    void testDetermineReinforcementSizeWhenBothPlayersAreLow() {
+        def p1Hand = initHandWithCards(3)
+        def p2Hand = initHandWithCards(3)
+        assert TurnService.determineReinforcementSize(p1Hand, p2Hand) == p1Hand.size()
+        assert TurnService.determineReinforcementSize(p1Hand, p2Hand) == p2Hand.size()
+    }
+
+    private initHandWithCards(int numCards) {
+        def hand = new Hand()
+        numCards.times {
+            hand.add(new Card())
+        }
+
+        return hand
+    }
 
 }

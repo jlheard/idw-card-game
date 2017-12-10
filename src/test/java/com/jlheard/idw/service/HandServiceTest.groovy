@@ -57,7 +57,7 @@ class HandServiceTest extends GroovyTestCase {
 
         def initSize = hand.size()
 
-        assert HandService.playCardsForWar(hand).size() == HandService.MAX_CARDS_TO_PLAY_AT_WAR
+        assert HandService.playCardsForWar(hand, HandService.MAX_CARDS_TO_PLAY_AT_WAR).size() == HandService.MAX_CARDS_TO_PLAY_AT_WAR
         assert hand.size() == initSize - HandService.MAX_CARDS_TO_PLAY_AT_WAR
     }
 
@@ -70,7 +70,7 @@ class HandServiceTest extends GroovyTestCase {
         hand.addAll(jackOfSpade, queenOfHeart)
 
         def initSize = hand.size()
-        def army = HandService.playCardsForWar(hand)
+        def army = HandService.playCardsForWar(hand, hand.size())
 
         assert army.size() == initSize
         assert hand.size() == initSize - army.size()

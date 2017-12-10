@@ -17,8 +17,8 @@ class HandService {
         return hand.removeFirst()
     }
 
-    static List<Card> playCardsForWar(Hand hand) {
-        def army = hand.take(MAX_CARDS_TO_PLAY_AT_WAR)
+    static List<Card> playCardsForWar(Hand hand, int reinforcementSize) {
+        def army = hand.take(reinforcementSize)
         hand.removeAll(army)
 
         return army

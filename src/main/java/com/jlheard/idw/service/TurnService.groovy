@@ -3,6 +3,7 @@ package com.jlheard.idw.service
 import com.jlheard.idw.domain.Card
 import com.jlheard.idw.domain.Game
 import com.jlheard.idw.domain.GameStatus
+import com.jlheard.idw.domain.Hand
 import com.jlheard.idw.domain.Player
 import org.springframework.stereotype.Service
 
@@ -46,10 +47,12 @@ class TurnService {
         def player2 = player2Args.player as Player
         def player2Army = player2Args.army as LinkedList<Card>
 
-        def player1Reinforcements = HandService.playCardsForWar(player1.hand)
+        def reinforcementSize = determineReinforcementSize(player1.hand, player2.hand)
+
+        def player1Reinforcements = HandService.playCardsForWar(player1.hand, reinforcementSize)
         player1Army.addAll(player1Reinforcements)
 
-        def player2Reinforcements = HandService.playCardsForWar(player2.hand)
+        def player2Reinforcements = HandService.playCardsForWar(player2.hand, reinforcementSize)
         player2Army.addAll(player2Reinforcements)
 
         spoils.addAll(player1Army + player2Army)
@@ -102,6 +105,26 @@ class TurnService {
         }
 
         return winner
+    }
+
+    static int determineReinforcementSize(Hand p1Hand, Hand p2Hand) {
+        def reinforcementSize
+        def p1HandSize = p1Hand.size()
+        def p2HandSize = p2Hand.size()
+
+        if(p1HandSize < HandService.MAX_CARDS_TO_PLAY_AT_WAR || p2HandSize < HandService.MAX_CARDS_TO_PLAY_AT_WAR) {
+            if(p1HandSize < p2HandSize) {
+                reinforcementSize = p1HandSize
+            } else if (p2HandSize < p1HandSize) {
+                reinforcementSize = p2HandSize
+            } else {
+                reinforcementSize = p1HandSize
+            }
+        } else {
+            reinforcementSize = HandService.MAX_CARDS_TO_PLAY_AT_WAR
+        }
+
+        return reinforcementSize
     }
 
 }
