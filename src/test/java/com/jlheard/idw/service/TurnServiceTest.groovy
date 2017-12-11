@@ -22,7 +22,6 @@ class TurnServiceTest extends GroovyTestCase {
         assert p2 == TurnService.getVictor(
                 [player: p2, army: p1Army],
                 [player: p1, army: p2Army],
-                []
         )
 
         assert p1.hand.size() == 0
@@ -38,8 +37,7 @@ class TurnServiceTest extends GroovyTestCase {
 
         assert p2 == TurnService.getVictor(
                 [player: p1, army: p1Army],
-                [player: p2, army: p2Army],
-                []
+                [player: p2, army: p2Army]
         )
 
         assert p1.hand.size() == 0
@@ -52,8 +50,7 @@ class TurnServiceTest extends GroovyTestCase {
 
         assert null == TurnService.getVictor(
                 [player: p2, army: [new Card(suit: Card.Suit.CLUB, rank: Card.Rank.NINE)]],
-                [player: p1, army: [new Card(suit: Card.Suit.HEART, rank: Card.Rank.NINE)]],
-                []
+                [player: p1, army: [new Card(suit: Card.Suit.HEART, rank: Card.Rank.NINE)]]
         )
 
         assert p1.hand.size() == 0
@@ -89,9 +86,8 @@ class TurnServiceTest extends GroovyTestCase {
 
         assert p1 == TurnService.determineWarVictor(
                 [player: p1, army: p1Army],
-                [player: p2, army: p2Army],
-                []
-        )
+                [player: p2, army: p2Army]
+        ).victor
 
         assert p1.hand.size() == p1Army.size() + p2Army.size() + (HandService.MAX_CARDS_TO_PLAY_AT_WAR * 2)
 
@@ -126,9 +122,8 @@ class TurnServiceTest extends GroovyTestCase {
 
         assert p2 == TurnService.determineWarVictor(
                 [player: p1, army: p1Army],
-                [player: p2, army: p2Army],
-                []
-        )
+                [player: p2, army: p2Army]
+        ).victor
 
         assert p2.hand.size() == p1Army.size() + p2Army.size() + (HandService.MAX_CARDS_TO_PLAY_AT_WAR * 2)
 
@@ -163,8 +158,7 @@ class TurnServiceTest extends GroovyTestCase {
 
         assert null == TurnService.getVictor(
                 [player: p1, army: p1Army],
-                [player: p2, army: p2Army],
-                []
+                [player: p2, army: p2Army]
         )
 
     }
@@ -175,7 +169,6 @@ class TurnServiceTest extends GroovyTestCase {
         def p2 = new Player("p2")
 
         p1.hand.addAll(
-                new Card(suit: Card.Suit.SPADE, rank: Card.Rank.NINE),
                 new Card(suit: Card.Suit.HEART, rank: Card.Rank.SEVEN),
                 new Card(suit: Card.Suit.SPADE, rank: Card.Rank.JACK),
                 new Card(suit: Card.Suit.SPADE, rank: Card.Rank.QUEEN),
@@ -187,7 +180,6 @@ class TurnServiceTest extends GroovyTestCase {
         )
 
         p2.hand.addAll(
-                new Card(suit: Card.Suit.CLUB, rank: Card.Rank.NINE),
                 new Card(suit: Card.Suit.DIAMOND, rank: Card.Rank.TWO),
                 new Card(suit: Card.Suit.HEART, rank: Card.Rank.QUEEN),
                 new Card(suit: Card.Suit.CLUB, rank: Card.Rank.FOUR),
@@ -198,7 +190,28 @@ class TurnServiceTest extends GroovyTestCase {
                 new Card(suit: Card.Suit.SPADE, rank: Card.Rank.TWO)
         )
 
-        assert p1 == TurnService.determineBattleVictor(p1, p2, [])
+        def p1Args = [player: p1, army: [new Card(suit: Card.Suit.SPADE, rank: Card.Rank.NINE)]]
+        def p2Args = [player: p2, army: [new Card(suit: Card.Suit.CLUB, rank: Card.Rank.NINE)]]
+
+        def args = TurnService.determineWarVictor(p1Args, p2Args)
+        def spoils = args.spoils
+        assert spoils instanceof List<Card>
+        assert args.p1Card.suit == Card.Suit.DIAMOND
+        assert args.p1Card.rank == Card.Rank.SEVEN
+        assert args.p2Card.suit == Card.Suit.SPADE
+        assert args.p2Card.rank == Card.Rank.SEVEN
+
+        p1Args = [player: p1, army: []]
+        p2Args = [player: p2, army: []]
+
+        args = TurnService.determineWarVictor(p1Args, p2Args, spoils)
+        assert args instanceof Map
+
+        assert args.victor == p1
+        assert args.p1Card.suit == Card.Suit.DIAMOND
+        assert args.p1Card.rank == Card.Rank.QUEEN
+        assert args.p2Card.suit == Card.Suit.SPADE
+        assert args.p2Card.rank == Card.Rank.TWO
         assert p1.hand.size() == 18
 
     }

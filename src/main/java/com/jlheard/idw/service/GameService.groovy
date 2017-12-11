@@ -19,15 +19,18 @@ import static com.jlheard.idw.domain.GameStatus.*
 class GameService {
 
     public static final ADD_PLAYER_TO_GAME_STATUSES = [NEW]
-    public static final DETERMINE_PLAYER_TO_DEAL_STATUSES = [NEW]
     public static final END_ROUND_STATUSES = [ROUND_IN_PROGRESS]
-    public static final START_GAME_STATUSES = [NEW]
+    public static final START_GAME_STATUSES = [NEW, FINISHED]
     public static final START_NEW_ROUND_STATUSES = [IN_PROGRESS, ROUND_FINISHED]
     public static final START_NEW_TURN_STATUSES = [ROUND_IN_PROGRESS]
     public static final TAKE_TURN_STATUSES = [AWAITING_PLAYER_TURN]
     public static final int NUMBER_OF_CARDS_TO_DEAL_EACH_PLAYER = 26
 
     Game game
+
+    def addJoshToGame() {
+        game.players << Player.JOSH
+    }
 
     def addPlayerToGame(String name) {
         addPlayerToGame(new Player(name))
@@ -91,21 +94,15 @@ class GameService {
 
     Player takeTurn() {
         if(isCorrectGameStatus(TAKE_TURN_STATUSES)) {
-            def roundWinner = TurnService.determineBattleVictor(game.players.first(), game.players.last(), [])
-            endRound()
+            def roundWinner = TurnService.determineBattleVictor(game.players.first(), game.players.last())
             return roundWinner
         }
 
         return null
     }
 
-    GameWinner endGame() {
-       def gameWinner = determineGameVictor(game.players.first(), game.players.last())
-        if(gameWinner) {
-            game.status = FINISHED
-        }
-
-        return gameWinner
+    void endGame() {
+        game.status = FINISHED
     }
 
     static GameWinner determineGameVictor(Player player1, Player player2) {

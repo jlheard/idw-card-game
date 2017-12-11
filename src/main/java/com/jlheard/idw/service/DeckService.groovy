@@ -19,8 +19,7 @@ class DeckService {
         return deck
     }
 
-    static Deck cutDeck(Deck deck) {
-        def cutIndex = RandomNumberUtils.getRandomInt(20, 32)
+    static Deck cutDeck(Deck deck, int cutIndex = RandomNumberUtils.getRandomInt(20, 32)) {
         def topCut = deck.take(cutIndex)
         deck.removeAll(topCut)
         deck.addAll(topCut)

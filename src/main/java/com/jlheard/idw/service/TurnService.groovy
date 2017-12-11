@@ -1,6 +1,8 @@
 package com.jlheard.idw.service
 
-import com.jlheard.idw.domain.*
+import com.jlheard.idw.domain.Card
+import com.jlheard.idw.domain.Hand
+import com.jlheard.idw.domain.Player
 import org.springframework.stereotype.Service
 
 /**
@@ -12,28 +14,18 @@ import org.springframework.stereotype.Service
 @Service
 class TurnService {
 
-    static void startTurn(Game game) {
-        game.status = GameStatus.ROUND_IN_PROGRESS
-    }
-
-    static determineBattleVictor(Player player1, Player player2, List<Card> spoils, boolean tie = false) {
-        spoils = tie ? spoils : new ArrayList<Card>()
-
-        def player1Army = tie ? [] : [HandService.playCard(player1.hand)]
-        def player2Army = tie ? [] : [HandService.playCard(player2.hand)]
+    static determineBattleVictor(Player player1, Player player2) {
+        def player1Army = [HandService.playCard(player1.hand)]
+        def player2Army = [HandService.playCard(player2.hand)]
         def player1Args = [player: player1, army: player1Army]
         def player2Args = [player: player2, army: player2Army]
 
-        def victor = getVictor(player1Args, player2Args, spoils, tie)
-
-        if(!victor && player1.hand && player2.hand) {
-            victor = determineBattleVictor(player1, player2, spoils, true)
-        }
+        def victor = getVictor(player1Args, player2Args)
 
         return victor
     }
 
-    static determineWarVictor(Map player1Args, Map player2Args, spoils) {
+    static determineWarVictor(Map player1Args, Map player2Args, List<Card> spoils = []) {
         def victor
 
         def player1 = player1Args.player as Player
@@ -56,23 +48,24 @@ class TurnService {
 
         if(victor) {
             HandService.addSpoilsOfWar(victor.hand, spoils)
+        } else {
+            return [spoils: spoils, p1Card: player1Army.last, p2Card: player2Army.last]
         }
 
-        return victor
+        return [victor: victor, p1Card: player1Army.last, p2Card: player2Army.last]
     }
 
-    protected static getVictor(Map player1Args, Map player2Args, List<Card> spoils, boolean tie = false) {
+    protected static getVictor(Map player1Args, Map player2Args) {
 
-        def victor = tie ? null : getWinner(player1Args, player2Args)
+        def victor = getWinner(player1Args, player2Args)
 
         if(victor) {
             def player1Army = player1Args.army as List<Card>
             def player2Army = player2Args.army as List<Card>
+            def spoils = []
 
             spoils.addAll(player1Army + player2Army)
             HandService.addSpoilsOfWar(victor.hand, spoils)
-        } else {
-            victor = determineWarVictor(player1Args, player2Args, spoils)
         }
 
         return victor
