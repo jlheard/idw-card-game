@@ -97,7 +97,7 @@ class GameServiceTest extends GroovyTestCase {
         def player1 = new Player("1")
         def player2 = new Player("2")
 
-        TurnService.metaClass.static.determineBattleVictor = { Player p1, Player p2, List<Card> l -> return player1 }
+        TurnService.metaClass.static.determineBattleVictor = { Player p1, Player p2, LinkedHashSet<Card> l -> return player1 }
 
         gameService.createNewGame()
         gameService.startGame()

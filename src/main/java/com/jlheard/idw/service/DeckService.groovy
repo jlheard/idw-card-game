@@ -14,7 +14,10 @@ import com.jlheard.idw.utils.RandomNumberUtils
 class DeckService {
 
     static Deck shuffleDeck(Deck deck) {
-        Collections.shuffle(deck)
+        def tempDeck = new LinkedList<Card>(deck)
+        Collections.shuffle(tempDeck)
+        deck.clear()
+        deck.addAll(tempDeck)
 
         return deck
     }
@@ -28,7 +31,9 @@ class DeckService {
     }
 
     static Card drawCard(Deck deck) {
-        return deck.removeFirst()
+        def drawnCard = deck.first()
+        deck.remove(drawnCard)
+        return drawnCard
     }
 
 }

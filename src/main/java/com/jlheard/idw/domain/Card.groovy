@@ -46,8 +46,8 @@ class Card implements Comparable<Card> {
 
     int hashCode() {
         int result
-        result = suit.hashCode()
-        result = 31 * result + rank.hashCode()
+        result = (suit != null ? suit.hashCode() : 0)
+        result = 31 * result + (rank != null ? rank.hashCode() : 0)
         return result
     }
 

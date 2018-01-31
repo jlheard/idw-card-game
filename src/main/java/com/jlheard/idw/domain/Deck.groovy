@@ -6,7 +6,7 @@ package com.jlheard.idw.domain
  * Date: 10/20/15
  * Time: 11:33 PM
  */
-class Deck extends LinkedList<Card> {
+class Deck extends LinkedHashSet<Card> {
 
     Deck() {
         Card.Rank.values().each { value ->

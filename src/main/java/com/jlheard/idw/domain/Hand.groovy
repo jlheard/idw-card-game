@@ -6,4 +6,4 @@ package com.jlheard.idw.domain
  * Date: 10/21/15
  * Time: 12:54 AM
  */
-class Hand extends LinkedList<Card> {}
+class Hand extends LinkedHashSet<Card> {}

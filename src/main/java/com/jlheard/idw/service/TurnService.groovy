@@ -25,14 +25,14 @@ class TurnService {
         return victor
     }
 
-    static determineWarVictor(Map player1Args, Map player2Args, List<Card> spoils = []) {
+    static determineWarVictor(Map player1Args, Map player2Args, LinkedHashSet<Card> spoils = []) {
         def victor
 
         def player1 = player1Args.player as Player
-        def player1Army = player1Args.army as LinkedList<Card>
+        def player1Army = player1Args.army as LinkedHashSet<Card>
 
         def player2 = player2Args.player as Player
-        def player2Army = player2Args.army as LinkedList<Card>
+        def player2Army = player2Args.army as LinkedHashSet<Card>
 
         def reinforcementSize = determineReinforcementSize(player1.hand, player2.hand)
 
@@ -49,10 +49,10 @@ class TurnService {
         if(victor) {
             HandService.addSpoilsOfWar(victor.hand, spoils)
         } else {
-            return [spoils: spoils, p1Card: player1Army.last, p2Card: player2Army.last]
+            return [spoils: spoils, p1Card: player1Army.last(), p2Card: player2Army.last()]
         }
 
-        return [victor: victor, p1Card: player1Army.last, p2Card: player2Army.last]
+        return [victor: victor, p1Card: player1Army.last(), p2Card: player2Army.last()]
     }
 
     protected static getVictor(Map player1Args, Map player2Args) {
@@ -60,9 +60,9 @@ class TurnService {
         def victor = getWinner(player1Args, player2Args)
 
         if(victor) {
-            def player1Army = player1Args.army as List<Card>
-            def player2Army = player2Args.army as List<Card>
-            def spoils = []
+            def player1Army = player1Args.army as LinkedHashSet<Card>
+            def player2Army = player2Args.army as LinkedHashSet<Card>
+            def spoils = new LinkedHashSet<Card>()
 
             spoils.addAll(player1Army + player2Army)
             HandService.addSpoilsOfWar(victor.hand, spoils)
@@ -74,12 +74,12 @@ class TurnService {
     static Player getWinner(Map player1Args, Map player2Args) {
         def winner = null
 
-        def player1Army = player1Args.army as List<Card>
+        def player1Army = player1Args.army as LinkedHashSet<Card>
         def player1 = player1Args.player as Player
         def player1Soldier = player1Army.last() as Card
 
         def player2 = player2Args.player as Player
-        def player2Army = player2Args.army as List<Card>
+        def player2Army = player2Args.army as LinkedHashSet<Card>
         def player2Soldier = player2Army.last() as Card
 
         if(player1Soldier > player2Soldier) {

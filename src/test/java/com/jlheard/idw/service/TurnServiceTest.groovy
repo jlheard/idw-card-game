@@ -195,7 +195,7 @@ class TurnServiceTest extends GroovyTestCase {
 
         def args = TurnService.determineWarVictor(p1Args, p2Args)
         def spoils = args.spoils
-        assert spoils instanceof List<Card>
+        assert spoils instanceof LinkedHashSet<Card>
         assert args.p1Card.suit == Card.Suit.DIAMOND
         assert args.p1Card.rank == Card.Rank.SEVEN
         assert args.p2Card.suit == Card.Suit.SPADE

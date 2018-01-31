@@ -15,7 +15,7 @@ class HandServiceTest extends GroovyTestCase {
         def hand = new Hand()
         hand.add(new Card(rank: Card.Rank.JACK, suit: Card.Suit.SPADE))
 
-        def expectedCard = hand.first
+        def expectedCard = hand.first()
         def sizeAfterAddingCard = hand.size()
         def drawnCard = HandService.playCard(hand)
 
@@ -33,15 +33,17 @@ class HandServiceTest extends GroovyTestCase {
 
         hand.add(jackOfSpade)
 
-        def spoils = [queenOfHeart, puppyToes]
+        def spoils = [queenOfHeart, puppyToes] as LinkedHashSet<Card>
 
         HandService.addSpoilsOfWar(hand, spoils)
 
         assert hand.size() == 1 + spoils.size()
 
+        def testHand = new LinkedList<Card>(hand)
+
         // should be after the existing cards in hand
-        assert hand.indexOf(queenOfHeart) > hand.indexOf(jackOfSpade)
-        assert hand.indexOf(puppyToes) > hand.indexOf(jackOfSpade)
+        assert testHand.indexOf(queenOfHeart) > testHand.indexOf(jackOfSpade)
+        assert testHand.indexOf(puppyToes) > testHand.indexOf(jackOfSpade)
     }
 
     void testPlayCardsForWar() {

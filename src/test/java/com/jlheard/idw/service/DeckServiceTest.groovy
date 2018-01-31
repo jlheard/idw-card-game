@@ -26,7 +26,7 @@ class DeckServiceTest extends GroovyTestCase {
         def deck = new Deck()
         def cutIndex = RandomNumberUtils.getRandomInt(20, 32)
         def expectedFirstCard = deck[cutIndex]
-        def expectedMiddleCard = deck.first
+        def expectedMiddleCard = deck.first()
 
         def randomStub = new StubFor(RandomNumberUtils)
 
@@ -36,7 +36,7 @@ class DeckServiceTest extends GroovyTestCase {
             DeckService.cutDeck(deck)
 
             assert deck.size() == 52
-            assert expectedFirstCard == deck.first
+            assert expectedFirstCard == deck.first()
             assert expectedMiddleCard == deck[deck.size()-cutIndex]
         }
 
@@ -46,7 +46,7 @@ class DeckServiceTest extends GroovyTestCase {
     void testDrawCard() {
         def deck = new Deck()
 
-        def expectedCard = deck.first
+        def expectedCard = deck.first()
         def drawnCard = DeckService.drawCard(deck)
 
         assert deck.size() == 51

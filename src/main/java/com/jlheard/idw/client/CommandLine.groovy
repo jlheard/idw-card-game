@@ -118,15 +118,18 @@ class CommandLine {
         println("\nPress enter to start the next round.")
         sc.nextLine()
 
-        println("I played:\t ${joshHand.first}")
-        println("You played:\t ${playerHand.first}")
+        def joshPlayed = joshHand.first()
+        def playerPlayed = playerHand.first()
+
+        println("I played:\t ${joshPlayed}")
+        println("You played:\t ${playerPlayed}")
 
         def roundWinner = gameService.takeTurn()
 
         if (roundWinner) {
             endRound(gameService, roundWinner, joshHand, playerHand)
         } else {
-            def map = iDeclareWar(josh, player)
+            def map = iDeclareWar(josh, player, joshPlayed, playerPlayed)
             if(map.victor) {
                 println("\nDuring the war I played:\t ${map.p1Card}")
                 println("During the war you played:\t ${map.p2Card}")
@@ -149,15 +152,15 @@ class CommandLine {
         }
     }
 
-    private static iDeclareWar(Player player1, Player player2) {
+    private static iDeclareWar(Player player1, Player player2, Card joshPlayed, Card playerPlayed) {
         println("It is a tie. Press Enter to Get ready for war!")
         sc.nextLine()
         println("I - De-clare - War!")
 
-        TurnService.determineWarVictor(playerToArgs(player1, [player1.hand.last]), playerToArgs(player2, [player2.hand.last]))
+        TurnService.determineWarVictor(playerToArgs(player1, [joshPlayed] as LinkedHashSet<Card>), playerToArgs(player2, [playerPlayed] as LinkedHashSet<Card>))
     }
 
-    private static iDeclareWarTie(Player player1, Player player2, List<Card> spoils, int count) {
+    private static iDeclareWarTie(Player player1, Player player2, LinkedHashSet<Card> spoils, int count) {
         println("Wow this makes tie number $count! Press Enter to Get ready for war again!!!")
         sc.nextLine()
         println("I - De-clare - War!")
@@ -165,11 +168,11 @@ class CommandLine {
         TurnService.determineWarVictor(playerToArgs(player1), playerToArgs(player2), spoils)
     }
 
-    private static playerToArgs(Player player, List<Card> army = []) {
+    private static playerToArgs(Player player, LinkedHashSet<Card> army = []) {
         [player: player, army: army]
     }
 
-    private static endRound(GameService gameService, Player roundWinner, List<Card> joshHand, List<Card> playerHand) {
+    private static endRound(GameService gameService, Player roundWinner, Set<Card> joshHand, Set<Card> playerHand) {
         println("$roundWinner.name wins this round!")
         gameService.endRound()
 
@@ -177,7 +180,9 @@ class CommandLine {
         println("You have ${playerHand.size()} cards remaning.")
 
         // this will fail if the edge case of the missing cards arises for debugging purposes
-        assert joshHand.size() + playerHand.size() == 52
+        if(joshHand.size() + playerHand.size() != 52) {
+            throw new Exception("Always need 52 cards in play!")
+        }
     }
 
     private static endTheGame(GameService gameService, GameWinner gameWinner) {

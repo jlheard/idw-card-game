@@ -14,19 +14,22 @@ class HandService {
     public static final int MAX_CARDS_TO_PLAY_AT_WAR = 4
 
     static Card playCard(Hand hand) {
-        return hand.removeFirst()
+        def cardDrawn = hand.first()
+        hand.remove(cardDrawn)
+        return cardDrawn
     }
 
-    static List<Card> playCardsForWar(Hand hand, int reinforcementSize) {
+    static Set<Card> playCardsForWar(Hand hand, int reinforcementSize) {
         def army = hand.take(reinforcementSize)
         hand.removeAll(army)
 
         return army
     }
 
-    static Hand addSpoilsOfWar(Hand hand, List<Card> spoils) {
-        Collections.shuffle(spoils)
-        hand.addAll(spoils)
+    static Hand addSpoilsOfWar(Hand hand, LinkedHashSet<Card> spoils) {
+        def tempSpoils = new LinkedList<Card>(spoils)
+        Collections.shuffle(tempSpoils)
+        hand.addAll(tempSpoils)
         return hand
     }
 
