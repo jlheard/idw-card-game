@@ -31,7 +31,7 @@ class CommandLine {
     private static shallWePlay(String response, GameService gameService = null) {
         if (response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes")) {
             println("\nLet's get started; Good luck!")
-            gameService ? startTheGame(gameService): letPlay()
+            gameService ? startTheGame(gameService): letsPlay()
         } else if (response.equalsIgnoreCase("n") || response.equalsIgnoreCase("no")) {
             println("\nAww next time then! Good-bye")
             System.exit(0)
@@ -41,7 +41,7 @@ class CommandLine {
         }
     }
 
-    private static letPlay() {
+    private static letsPlay() {
         GameService gameService = new GameService()
 
         println("\nWhat is your name?")
