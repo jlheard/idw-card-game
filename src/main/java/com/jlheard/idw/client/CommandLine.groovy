@@ -175,6 +175,9 @@ class CommandLine {
 
         println("\nI have ${joshHand.size()} cards remaning.")
         println("You have ${playerHand.size()} cards remaning.")
+
+        // this will fail if the edge case of the missing cards arises for debugging purposes
+        assert joshHand.size() + playerHand.size() == 52
     }
 
     private static endTheGame(GameService gameService, GameWinner gameWinner) {
