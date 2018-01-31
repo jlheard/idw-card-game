@@ -14,10 +14,6 @@ class GameTest extends GroovyTestCase {
         assert game.status == GameStatus.INITIATED
     }
 
-    void testJoshuaIsInit() {
-         assert game.players.first() == Player.JOSH
-    }
-
     void testDeckIsInit() {
         assert !game.deck.empty
     }
