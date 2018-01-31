@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 public class Application {
 
     public static void main(String[] args) {
-        System.out.println("Joshua is waking up. Please wait...");
+        System.out.println("Josh is waking up. Please wait...");
         SpringApplication.run(Application.class, args);
         try {
             CommandLine.play();
