@@ -1,10 +1,6 @@
 package com.jlheard.idw.service
 
-import com.jlheard.idw.domain.Card
-import com.jlheard.idw.domain.GameStatus
-import com.jlheard.idw.domain.GameWinner
-import com.jlheard.idw.domain.Player
-import groovy.mock.interceptor.StubFor
+import com.jlheard.idw.domain.*
 
 import static com.jlheard.idw.service.GameService.ADD_PLAYER_TO_GAME_STATUSES
 import static com.jlheard.idw.service.GameService.START_GAME_STATUSES
@@ -17,106 +13,93 @@ import static com.jlheard.idw.service.GameService.START_GAME_STATUSES
  */
 class GameServiceTest extends GroovyTestCase {
 
-    final static PLAYER_1 = new Player("Player 1")
-
-    GameService gameService
+    private Game game
 
     @Override
     void setUp() {
-        gameService = new GameService()
+        game = GameService.createNewGame()
     }
 
     @Override
     void tearDown() {
-        gameService = null
+        game = null
     }
 
     void testGameCreation() {
-        gameService.createNewGame()
-        assert GameStatus.NEW == gameService.game.status
+        assert GameStatus.NEW == game.status
     }
 
     void testAddPlayerToGameCorrectStatus() {
         ADD_PLAYER_TO_GAME_STATUSES.each {
-            gameService.createNewGame()
-            gameService.game.status = it
-            assert gameService.addPlayerToGame("Jason")
+            game.status = it
+            assert GameService.addPlayerToGame(game, "Jason")
         }
     }
 
     void testAddPlayerToGameIncorrectStatus() {
         (GameStatus.values() - ADD_PLAYER_TO_GAME_STATUSES).each {
-            gameService.createNewGame()
-            gameService.game.status = it
+            game.status = it
 
-            assert !gameService.addPlayerToGame("Jason")
+            assert !GameService.addPlayerToGame(game, "Jason")
         }
     }
 
 
     void testStartGameWithCorrectStatus() {
         START_GAME_STATUSES.each {
-            gameService.createNewGame()
-            gameService.game.status = it
-            assert gameService.startGame()
-            assert gameService.game.status == GameStatus.IN_PROGRESS
+            game.status = it
+            assert GameService.startGame(game)
+            assert game.status == GameStatus.IN_PROGRESS
         }
     }
 
     void testStartGameWithIncorrectStatus() {
         (GameStatus.values() - START_GAME_STATUSES).each {
-            gameService.createNewGame()
-            gameService.game.status = it
-            assert !gameService.startGame()
-            assert gameService.game.status == it
+            game.status = it
+            assert !GameService.startGame(game)
+            assert game.status == it
         }
     }
 
     void testStartNewRoundHappyPath() {
-        def gs = new GameService()
-        gs.createNewGame()
-        gs.startGame()
-        gs.startNewRound()
+        GameService.startGame(game)
+        GameService.startNewRound(game)
 
-        assert gs.game.status == GameStatus.ROUND_IN_PROGRESS
+        assert game.status == GameStatus.ROUND_IN_PROGRESS
     }
 
     void testStartNewTurn() {
-        gameService.createNewGame()
-        gameService.startGame()
-        gameService.startNewRound()
-        gameService.startNewTurn()
+        GameService.startGame(game)
+        GameService.startNewRound(game)
+        GameService.startNewTurn(game)
 
-        assert gameService.game.status == GameStatus.AWAITING_PLAYER_TURN
+        assert game.status == GameStatus.AWAITING_PLAYER_TURN
     }
 
-    //TODO: static method mocking is painful
     void testTakeTurn() {
-        def mock = new StubFor(TurnService.class)
-
         def player1 = new Player("1")
         def player2 = new Player("2")
 
-        TurnService.metaClass.static.determineBattleVictor = { Player p1, Player p2, LinkedHashSet<Card> l -> return player1 }
+        player1.hand.add(new Card(rank: Card.Rank.ACE, suit: Card.Suit.SPADE))
+        player2.hand.add(new Card(rank: Card.Rank.THREE, suit: Card.Suit.CLUB))
 
-        gameService.createNewGame()
-        gameService.startGame()
-        gameService.startNewRound()
-        gameService.startNewTurn()
-//        gameService.takeTurn()
+        assert GameService.addPlayerToGame(game, player1)
+        assert GameService.addPlayerToGame(game, player2)
 
+        GameService.startGame(game)
+        GameService.startNewRound(game)
+        GameService.startNewTurn(game)
 
-//        assert gameService.takeTurn() == player1
+        assert GameService.takeTurn(game) == player1
     }
 
     void testEndGame() {
-        gameService.createNewGame()
-        gameService.addPlayerToGame("1")
-        gameService.addPlayerToGame("2")
+        GameService.addPlayerToGame(game, "1")
+        GameService.addPlayerToGame(game, "2")
 
-        gameService.endGame()
+        GameService.endGame(game)
 
-        assert gameService.game.status == GameStatus.FINISHED
+        assert game.status == GameStatus.FINISHED
     }
 
     void testDetermineGameVictorPlayer1Wins() {
@@ -124,11 +107,10 @@ class GameServiceTest extends GroovyTestCase {
         p1.hand.add(new Card())
 
         def p2 = new Player("2")
-        gameService.createNewGame()
-        gameService.addPlayerToGame(p1)
-        gameService.addPlayerToGame(p2)
+        GameService.addPlayerToGame(game, p1)
+        GameService.addPlayerToGame(game, p2)
 
-        assert gameService.determineGameVictor(p1, p2) == GameWinner.PLAYER_1
+        assert GameService.determineGameVictor(p1, p2) == GameWinner.PLAYER_1
     }
 
     void testDetermineGameVictorPlayer2Wins() {
@@ -137,30 +119,27 @@ class GameServiceTest extends GroovyTestCase {
         def p2 = new Player("2")
         p2.hand.add(new Card())
 
-        gameService.createNewGame()
-        gameService.addPlayerToGame(p1)
-        gameService.addPlayerToGame(p2)
+        GameService.addPlayerToGame(game, p1)
+        GameService.addPlayerToGame(game, p2)
 
-        assert gameService.determineGameVictor(p1, p2) == GameWinner.PLAYER_2
+        assert GameService.determineGameVictor(p1, p2) == GameWinner.PLAYER_2
     }
 
     void testDetermineGameVictorTie() {
         def p1 = new Player("1")
         def p2 = new Player("2")
 
-        gameService.createNewGame()
-        gameService.addPlayerToGame(p1)
-        gameService.addPlayerToGame(p2)
+        GameService.addPlayerToGame(game, p1)
+        GameService.addPlayerToGame(game, p2)
 
-        assert gameService.determineGameVictor(p1, p2) == GameWinner.TIE
+        assert GameService.determineGameVictor(p1, p2) == GameWinner.TIE
     }
 
     void testAddPlayerWithJoshCPUName() {
 
-        gameService.createNewGame()
-        gameService.addPlayerToGame(Player.JOSH)
+        GameService.addPlayerToGame(game, Player.JOSH)
 
-        assert gameService.game.players.first().name == Player.HUMAN_JOSH_NAME
+        assert game.players.first().name == Player.HUMAN_JOSH_NAME
 
     }
 

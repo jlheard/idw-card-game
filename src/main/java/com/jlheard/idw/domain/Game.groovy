@@ -28,4 +28,19 @@ class Game {
     String getId() {
         return id
     }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof Game)) return false
+
+        Game game = (Game) o
+
+        if (id != game.id) return false
+
+        return true
+    }
+
+    int hashCode() {
+        return (id != null ? id.hashCode() : 0)
+    }
 }

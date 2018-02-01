@@ -4,7 +4,6 @@ import com.jlheard.idw.domain.Game
 import com.jlheard.idw.domain.GameStatus
 import com.jlheard.idw.domain.GameWinner
 import com.jlheard.idw.domain.Player
-import org.springframework.stereotype.Service
 
 import static com.jlheard.idw.domain.GameStatus.*
 
@@ -15,7 +14,6 @@ import static com.jlheard.idw.domain.GameStatus.*
  * Date: 10/21/15
  * Time: 9:36 PM
  */
-@Service
 class GameService {
 
     public static final ADD_PLAYER_TO_GAME_STATUSES = [NEW]
@@ -26,18 +24,17 @@ class GameService {
     public static final TAKE_TURN_STATUSES = [AWAITING_PLAYER_TURN]
     public static final int NUMBER_OF_CARDS_TO_DEAL_EACH_PLAYER = 26
 
-    Game game
 
-    def addJoshToGame() {
+    static void addJoshToGame(Game game) {
         game.players << Player.JOSH
     }
 
-    def addPlayerToGame(String name) {
-        addPlayerToGame(new Player(name))
+    static boolean addPlayerToGame(Game game, String name) {
+        addPlayerToGame(game, new Player(name))
     }
 
-    def addPlayerToGame(Player player) {
-        if(isCorrectGameStatus(ADD_PLAYER_TO_GAME_STATUSES)) {
+    static boolean addPlayerToGame(Game game, Player player) {
+        if(isCorrectGameStatus(game, ADD_PLAYER_TO_GAME_STATUSES)) {
             if(player.name.trim() == Player.JOSH.name) {
                 player.name = Player.HUMAN_JOSH_NAME
             }
@@ -47,13 +44,14 @@ class GameService {
         }
     }
 
-    void createNewGame() {
-        game = new Game()
+    static Game createNewGame() {
+        def game = new Game()
         game.status = NEW
+        return game
     }
 
-    def endRound() {
-        if(isCorrectGameStatus(END_ROUND_STATUSES)) {
+    static def endRound(Game game) {
+        if(isCorrectGameStatus(game, END_ROUND_STATUSES)) {
             game.status = ROUND_FINISHED
             return true
         }
@@ -61,12 +59,12 @@ class GameService {
         return false
     }
 
-    private def isCorrectGameStatus(List<GameStatus> correctStatuses) {
+    private static boolean isCorrectGameStatus(Game game, List<GameStatus> correctStatuses) {
         game.status in correctStatuses
     }
 
-    def startGame() {
-        if(isCorrectGameStatus(START_GAME_STATUSES)) {
+    static boolean startGame(Game game) {
+        if(isCorrectGameStatus(game, START_GAME_STATUSES)) {
             game.status = IN_PROGRESS
             true
         } else {
@@ -74,8 +72,8 @@ class GameService {
         }
     }
 
-    def startNewRound() {
-        if(isCorrectGameStatus(START_NEW_ROUND_STATUSES)) {
+    static boolean startNewRound(Game game) {
+        if(isCorrectGameStatus(game, START_NEW_ROUND_STATUSES)) {
             game.status = ROUND_IN_PROGRESS
             true
         } else {
@@ -83,8 +81,8 @@ class GameService {
         }
     }
 
-    def startNewTurn() {
-        if(isCorrectGameStatus(START_NEW_TURN_STATUSES)) {
+    static boolean startNewTurn(Game game) {
+        if(isCorrectGameStatus(game, START_NEW_TURN_STATUSES)) {
             game.status = AWAITING_PLAYER_TURN
             true
         } else {
@@ -92,8 +90,8 @@ class GameService {
         }
     }
 
-    Player takeTurn() {
-        if(isCorrectGameStatus(TAKE_TURN_STATUSES)) {
+    static Player takeTurn(Game game) {
+        if(isCorrectGameStatus(game, TAKE_TURN_STATUSES)) {
             def roundWinner = TurnService.determineBattleVictor(game.players.first(), game.players.last())
             return roundWinner
         }
@@ -101,7 +99,7 @@ class GameService {
         return null
     }
 
-    void endGame() {
+    static void endGame(Game game) {
         game.status = FINISHED
     }
 

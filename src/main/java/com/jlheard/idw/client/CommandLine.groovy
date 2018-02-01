@@ -1,6 +1,7 @@
 package com.jlheard.idw.client
 
 import com.jlheard.idw.domain.Card
+import com.jlheard.idw.domain.Game
 import com.jlheard.idw.domain.GameWinner
 import com.jlheard.idw.domain.Player
 import com.jlheard.idw.service.DealService
@@ -28,10 +29,10 @@ class CommandLine {
         shallWePlay(response)
     }
 
-    private static shallWePlay(String response, GameService gameService = null) {
+    private static shallWePlay(String response, Game game = null) {
         if (response.equalsIgnoreCase("y") || response.equalsIgnoreCase("yes")) {
             println("\nLet's get started; Good luck!")
-            gameService ? startTheGame(gameService): letsPlay()
+            game ? GameService.startGame(game): letsPlay()
         } else if (response.equalsIgnoreCase("n") || response.equalsIgnoreCase("no")) {
             println("\nAww next time then! Good-bye")
             System.exit(0)
@@ -42,8 +43,6 @@ class CommandLine {
     }
 
     private static letsPlay() {
-        GameService gameService = new GameService()
-
         println("\nWhat is your name?")
         String playerName = sc.nextLine()
 
@@ -54,66 +53,66 @@ class CommandLine {
 
         println("Hello $playerName, nice to meet you!")
 
-        gameService.createNewGame()
+        def game = GameService.createNewGame()
 
-        gameService.addJoshToGame()
-        gameService.addPlayerToGame(playerName)
+        GameService.addJoshToGame(game)
+        GameService.addPlayerToGame(game, playerName)
 
-        startTheGame(gameService)
+        startTheGame(game)
     }
 
-    private static startTheGame(GameService gameService) {
+    private static startTheGame(Game game) {
         println("\nI am shuffling the deck...")
-        DeckService.shuffleDeck(gameService.game.deck)
+        DeckService.shuffleDeck(game.deck)
 
-        cutTheDeck(gameService)
+        cutTheDeck(game)
         println("\nYou have cut the deck...")
 
         println("I am dealing the deck...")
-        DealService.dealCards(gameService.game, GameService.NUMBER_OF_CARDS_TO_DEAL_EACH_PLAYER)
+        DealService.dealCards(game, GameService.NUMBER_OF_CARDS_TO_DEAL_EACH_PLAYER)
 
-        gameService.startGame()
+        GameService.startGame(game)
 
         def gameWinner = null
 
         while (!gameWinner) {
-            startTheBattle(gameService)
-            gameWinner = gameService.determineGameVictor(gameService.game.players.first(), gameService.game.players.last())
+            startTheBattle(game)
+            gameWinner = GameService.determineGameVictor(game.players.first(), game.players.last())
         }
 
-        endTheGame(gameService, gameWinner)
+        endTheGame(game, gameWinner)
     }
 
-    private static cutTheDeck(GameService gameService) {
+    private static cutTheDeck(Game game) {
         Scanner cutSC = new Scanner(System.in)
         def min = 0
-        def max = gameService.game.deck.size()
+        def max = game.deck.size()
         println("\nSelect any number between 0 and $max to cut the deck.")
 
         try {
             def input = cutSC.nextInt()
             if (min <= input && max >= input) {
-                DeckService.cutDeck(gameService.game.deck, input)
+                DeckService.cutDeck(game.deck, input)
             } else {
                 println("\nPlease select a number between $min and $max!")
-                cutTheDeck(gameService)
+                cutTheDeck(game)
             }
         } catch (InputMismatchException ime) {
             println("\nPlease enter a valid number!")
-            cutTheDeck(gameService)
+            cutTheDeck(game)
         }
     }
 
-    private static startTheBattle(GameService gameService) {
+    private static startTheBattle(Game game) {
 
-        def josh = gameService.game.players.first()
-        def player = gameService.game.players.last()
+        def josh = game.players.first()
+        def player = game.players.last()
 
         def joshHand = josh.hand
         def playerHand = player.hand
 
-        gameService.startNewRound()
-        gameService.startNewTurn()
+        GameService.startNewRound(game)
+        GameService.startNewTurn(game)
 
         println("\nPress enter to start the next round.")
         sc.nextLine()
@@ -124,17 +123,17 @@ class CommandLine {
         println("I played:\t ${joshPlayed}")
         println("You played:\t ${playerPlayed}")
 
-        def roundWinner = gameService.takeTurn()
+        def roundWinner = GameService.takeTurn(game)
 
         if (roundWinner) {
-            endRound(gameService, roundWinner, joshHand, playerHand)
+            endRound(game, roundWinner, joshHand, playerHand)
         } else {
             def map = iDeclareWar(josh, player, joshPlayed, playerPlayed)
             if(map.victor) {
                 println("\nDuring the war I played:\t ${map.p1Card}")
                 println("During the war you played:\t ${map.p2Card}")
                 roundWinner = map.victor as Player
-                endRound(gameService, roundWinner, joshHand, playerHand)
+                endRound(game, roundWinner, joshHand, playerHand)
             } else {
                 def count = 2
                 def tieMap = iDeclareWarTie(josh, player, map.spoils, count)
@@ -147,7 +146,7 @@ class CommandLine {
                 println("\nDuring the war I played:\t ${map.p1Card}")
                 println("During the war you played:\t ${map.p2Card}")
                 roundWinner = tieMap.victor as Player
-                endRound(gameService, roundWinner, joshHand, playerHand)
+                endRound(game, roundWinner, joshHand, playerHand)
             }
         }
     }
@@ -172,9 +171,9 @@ class CommandLine {
         [player: player, army: army]
     }
 
-    private static endRound(GameService gameService, Player roundWinner, Set<Card> joshHand, Set<Card> playerHand) {
+    private static endRound(Game game, Player roundWinner, Set<Card> joshHand, Set<Card> playerHand) {
         println("$roundWinner.name wins this round!")
-        gameService.endRound()
+        GameService.endRound(game)
 
         println("\nI have ${joshHand.size()} cards remaning.")
         println("You have ${playerHand.size()} cards remaning.")
@@ -185,8 +184,8 @@ class CommandLine {
         }
     }
 
-    private static endTheGame(GameService gameService, GameWinner gameWinner) {
-        gameService.endGame()
+    private static endTheGame(Game game, GameWinner gameWinner) {
+        GameService.endGame(game)
 
         switch (gameWinner) {
             case GameWinner.PLAYER_1:
@@ -202,7 +201,7 @@ class CommandLine {
                 println("ErR0r: All your base are belong to us!")
         }
         println("\nShall we play again?  Please enter Y or N.")
-        shallWePlay(sc.nextLine(), gameService)
+        shallWePlay(sc.nextLine(), game)
     }
 
 }
