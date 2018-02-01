@@ -1,6 +1,7 @@
 package com.jlheard.idw.service
 
 import com.jlheard.idw.domain.Card
+import com.jlheard.idw.domain.Deck
 import com.jlheard.idw.domain.Hand
 import com.jlheard.idw.domain.Player
 
@@ -173,7 +174,7 @@ class TurnServiceTest extends GroovyTestCase {
                 new Card(suit: Card.Suit.SPADE, rank: Card.Rank.JACK),
                 new Card(suit: Card.Suit.SPADE, rank: Card.Rank.QUEEN),
                 new Card(suit: Card.Suit.DIAMOND, rank: Card.Rank.SEVEN),
-                new Card(suit: Card.Suit.DIAMOND, rank: Card.Rank.FOUR),
+                new Card(suit: Card.Suit.SPADE, rank: Card.Rank.FOUR),
                 new Card(suit: Card.Suit.HEART, rank: Card.Rank.THREE),
                 new Card(suit: Card.Suit.DIAMOND, rank: Card.Rank.FOUR),
                 new Card(suit: Card.Suit.DIAMOND, rank: Card.Rank.QUEEN)
@@ -240,10 +241,10 @@ class TurnServiceTest extends GroovyTestCase {
     }
 
     private initHandWithCards(int numCards) {
+        def deck = new Deck()
         def hand = new Hand()
-        numCards.times {
-            hand.add(new Card())
-        }
+
+        hand.addAll(deck.take(numCards))
 
         return hand
     }
